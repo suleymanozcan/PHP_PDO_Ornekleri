@@ -10,7 +10,6 @@ Options +FollowSymlinks
 RewriteEngine on
 RewriteBase /
 
-RewriteRule index.html              index.php [L,NC]
 
 # php -- BEGIN cPanel-generated handler, do not edit
 # Set the “ea-php74” package as the default “PHP” programming language.

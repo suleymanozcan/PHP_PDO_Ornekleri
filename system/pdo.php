@@ -66,7 +66,7 @@ Class Database extends PDO {
         try {
             $stmt->execute();
             $response->status       = 1;
-            $response->message      = "Ekleme işlemi başarılı.";
+            $response->message      = "<center>Ekleme işlemi başarılı.</center>";
             $response->id           = $this->lastInsertId();
             return $response;
         } catch (PDOException $e) {
@@ -106,8 +106,16 @@ Class Database extends PDO {
         $response = new stdClass();
         try {
             $stmt->execute();
+            $affectedRows = $stmt->rowCount();
+
+            if ($affectedRows === 0) {
+                $response->status   = 0;
+                $response->message  = "<center><b>Güncelleme işlemi başarısız, hiçbir satır etkilenmedi.</b></center>";
+                return $response;
+            }
+
             $response->status   = 1;
-            $response->message  = "Güncelleme işlemi başarılı.";
+            $response->message  = "<center>Güncelleme işlemi başarılı.</center>";
             return $response;
         } catch (PDOException $e) {
             $response->status   = 0;
@@ -116,21 +124,29 @@ Class Database extends PDO {
         }
     }
 
+
     public function delete($table, $array) {
-        $sql = "DELETE FROM {$table} WHERE " . implode(' AND ', array_map(function($k) { return "$k = :$k"; }, array_keys($conditions)));
+        $sql = "DELETE FROM {$table} WHERE " . implode(' AND ', array_map(function($k) { return "$k = :$k"; }, array_keys($array)));
         $stmt = $this->prepare($sql);
-        foreach ($conditions as $key => $value) {
+        foreach ($array as $key => $value) {
             $stmt->bindValue(":{$key}", $value);
         }
+
         $response = new stdClass();
         try {
             $stmt->execute();
-            $response->status   = 1;
-            $response->message  = "Kayıtlar başarıyla silindi.";
+            $affected_rows = $stmt->rowCount();
+            if ($affected_rows === 0) {
+                $response->status = 0;
+                $response->message = "<center><b>Kayıt bulunamadı.</b></center>";
+            } else {
+                $response->status = 1;
+                $response->message = "<center>Kayıtlar başarıyla silindi.</center>";
+            }
             return $response;
         } catch (PDOException $e) {
-            $response->status   = 0;
-            $response->message  = "Kayıt silme işlemi başarısız: " . $e->getMessage();
+            $response->status = 0;
+            $response->message = "Veritabanında belirtilen tablo bulunamadı: {$table}";
             return $response;
         }
     }

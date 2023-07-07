@@ -1,7 +1,32 @@
 <?php
 $path = $_SERVER['DOCUMENT_ROOT']."/";
 require($path.'config.php');
+$sonuc  = "";
+if($delete == 'delete'){
+    $where = ['id' => $id];
+    $result = $db->delete('products', $where);
+    $sonuc = $result->message;
+}
+/*
+bu şekilde de kullanabilirsiniz ama yukarıdaki asıl kod okunabilirlik açısından sizi daha da rahatlatacaktır.
+if($delete=='delete'){
+    $where = array(
+        'id' => $id
+    );
+    $result = $db->delete('products',$where);
+    if($result->status==1){
+        $sonuc  = $result->message;
+    } else {
+        $sonuc  = "<b>{$result->message}</b>";
+    }
+}
+*/
 $product    = $db->query("SELECT * FROM products ORDER BY updated_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+/*
+    fetch ve fetchAll olarak 2 farklı kullanımı bulunmaktadır.
+    fetch olarak kullanırsanız tek bir sonuç alırsınız. Genel olarak bu işlemi WHERE ile alakalı sorgular da kullanırız.
+    fetchAll ise tüm sonuçları listeler tabi burada da WHERE kullanabiliriz. WHERE kullanımın da ise eşleşen tüm sonuçları gösterir.
+*/
 ?>
 <!DOCTYPE html>
 <html lang="tr">
@@ -13,11 +38,9 @@ $product    = $db->query("SELECT * FROM products ORDER BY updated_at DESC")->fet
     <link href="minata/css.css?time=<? echo time(); ?>" rel="stylesheet">
 </head>
 <body>
-<header>
-    <a href="index.html">Ürün Listesi</a>
-    <a href="product-add.html">Ürün Ekle</a>
-</header>
+<? include(THEME.'header.php'); ?>
 <div class="container">
+    <? echo $sonuc; ?>
     <table>
         <thead>
             <tr>
@@ -38,10 +61,10 @@ $product    = $db->query("SELECT * FROM products ORDER BY updated_at DESC")->fet
                 <td><? echo $products['name']; ?></td>
                 <td class="center"><? echo $products['stock_quantity']; ?></td>
                 <td class="center"><? echo $products['price']; ?></td>
-                <td class="center"><? echo $products['vat']; ?></td>
-                <td class="center"><a href="">İncele</a></td>
-                <td class="center"><a href="">Düzenle</a></td>
-                <td class="center"><a href="">Sil</a></td>
+                <td class="center">%<? echo $products['vat']; ?></td>
+                <td class="center"><a href="product-detail.php?url=<? echo $products['url']; ?>">İncele</a></td>
+                <td class="center"><a href="product-edit.php?id=<? echo $products['id']; ?>">Düzenle</a></td>
+                <td class="center"><a href="index.php?id=<? echo $products['id']; ?>&delete=delete">Sil</a></td>
             </tr>
         <?php }
         /*
